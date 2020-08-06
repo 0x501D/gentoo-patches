@@ -1,0 +1,92 @@
+--- a/src/dd.c	2014-12-21 20:53:35.589959268 +0300
++++ b/src/dd.c	2014-12-21 20:54:36.192956566 +0300
+@@ -104,6 +104,9 @@
+    OFF_T_MAX, for the benefit of the large-offset seek code.  */
+ #define MAX_BLOCKSIZE(slop) MIN (SIZE_MAX - (slop), MIN (SSIZE_MAX, OFF_T_MAX))
+ 
++/* Buffer for /proc/mounts */
++#define MOUNTS_LINE_BUF 1024
++
+ /* Conversions bit masks. */
+ enum
+   {
+@@ -2160,6 +2163,66 @@
+   return exit_status;
+ }
+ 
++int disk_is_mounted(const char *disk)
++{
++  struct stat info;
++  FILE *fp;
++  char buf[MOUNTS_LINE_BUF + 1];
++  char *token;
++  
++  if((stat(disk, &info)) == -1)
++    return 0;
++
++  if(S_ISBLK(info.st_mode))
++  {
++    if((fp = fopen("/proc/mounts", "r")) == NULL) 
++    {  
++      perror("PROC");
++      exit(2);
++    }
++    
++    while(fgets(buf, MOUNTS_LINE_BUF, fp) != NULL)
++    {
++      if(strstr(buf, disk) != NULL)
++      {
++        printf("disk %s is mounted!\n", disk);
++        token = strtok(buf, " ");
++        printf("%-15s%s\n", "* partition: ", token);
++        token = strtok(NULL, " ");
++        printf("%-15s%s\n", "* mount point: ", token);
++
++        fclose(fp);
++        return 1; 
++      }
++    }
++
++    fclose(fp);
++  }
++
++  return 0;
++}
++
++int user_confirm_action(void)
++{
++  char answer[11];
++  size_t pos;
++  const char *confirm = "PROCEED";
++
++  printf("\nEnter \"%s\" to confirm action: ", confirm);
++  fgets(answer, 10, stdin);
++
++  pos = strlen(answer) - 1;
++  if(answer[pos] == '\n')
++    answer[pos] = '\0';
++
++  if(! strncmp(answer, confirm, sizeof(answer)))
++    return 1;
++
++  printf("Operation was canceled by user.\n");
++  
++  return 0;
++}
++
+ int
+ main (int argc, char **argv)
+ {
+@@ -2196,6 +2259,12 @@
+ 
+   apply_translations ();
+ 
++  /* Check if target file is a disk and mounted */
++  if (output_file != NULL)
++    if(disk_is_mounted(output_file))
++      if(! user_confirm_action())
++        exit(3);
++
+   if (input_file == NULL)
+     {
+       input_file = _("standard input");

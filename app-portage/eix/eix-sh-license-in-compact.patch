@@ -1,0 +1,26 @@
+diff --git a/src/eixrc/defaults.cc b/src/eixrc/defaults.cc
+index 55605eb..167293f 100644
+--- a/src/eixrc/defaults.cc
++++ b/src/eixrc/defaults.cc
+@@ -3240,6 +3240,13 @@ AddOption(STRING, "FORMATLINE_LICENSES",
+ 	"%{?PRINT_ALWAYS}{}%{FORMAT_NEWLINE}%{else}%{FORMAT_NEWLINE}{}%{}", P_("FORMATLINE_LICENSES",
+ 	"This variable is only used for delayed substitution.\n"
+ 	"It defines the format for a line with the package licenses."));
++
++AddOption(STRING, "FORMATLINE_LICENSES_COMPACT",
++	"%{!PRINT_ALWAYS}{licenses}%{}"
++		"(%{COLOR_NORMAL})<licenses>"
++		"%{!RESET_ALL_LINES}(%{COLOR_NORMAL_END})%{}", P_("FORMATLINE_LICENSES_COMPACT",
++	"This variable is only used for delayed substitution.\n"
++	"It defines the format for a line with the package licenses."));
+ #endif
+ 
+ #if defined(JUMBO_BUILD) || (DEFAULT_PART == 6)
+@@ -3267,6 +3274,7 @@ AddOption(STRING, "FORMAT_ALL",
+ AddOption(STRING, "FORMAT_ALL_COMPACT",
+ 	"{*modus=compact}"
+ 	"%{FORMATLINE_NAME_COMPACT}"
++	" [%{FORMATLINE_LICENSES_COMPACT}]"
+ 	" (%{COLOR_NORMAL})\\((%{COLOR_NORMAL_END})"
+ 	"{havemarkedversion}<markedversions:MARKEDVERSION>; {}"
+ 	"{installed}"

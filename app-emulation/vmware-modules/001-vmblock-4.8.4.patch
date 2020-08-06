@@ -1,0 +1,54 @@
+--- vmblock-only/linux/inode.c.orig	2016-10-24 23:41:05.921851133 +0300
++++ vmblock-only/linux/inode.c	2016-10-24 23:41:43.292850160 +0300
+@@ -44,9 +44,9 @@
+ static int InodeOpReadlink(struct dentry *, char __user *, int);
+ #endif
+ 
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 99)
+-static const char *InodeOpFollowlink(struct dentry *dentry, struct inode *inode, void **cookie);
+-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 99)
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)
++static const char *InodeOpGetlink(struct dentry *dentry, struct inode *inode, struct delayed_call *dc);
++#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+ static const char *InodeOpFollowlink(struct dentry *dentry, void **cookie);
+ #elif LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 13)
+ static void *InodeOpFollowlink(struct dentry *dentry, struct nameidata *nd);
+@@ -65,8 +65,8 @@
+ struct inode_operations LinkInodeOps = {
+ #endif
+    .readlink    = InodeOpReadlink,
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 99)
+-   .get_link = InodeOpFollowlink,
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)
++   .get_link = InodeOpGetlink,
+ #else
+    .follow_link = InodeOpFollowlink,
+ #endif
+@@ -236,11 +236,15 @@
+ #else
+ static int
+ #endif
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)
++InodeOpGetlink(struct dentry *dentry,  // IN : dentry of symlink
++#else
+ InodeOpFollowlink(struct dentry *dentry,  // IN : dentry of symlink
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 99)
+-                  struct inode *inode,
+ #endif
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 99)
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)
++                  struct inode *inode,
++		  struct delayed_call *dc)
++#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+                   void **cookie)          // OUT: stores opaque pointer
+ #else
+                   struct nameidata *nd)   // OUT: stores result
+@@ -270,7 +274,7 @@
+    }
+ 
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 99)
+-   return *cookie = iinfo->name;
++   return (char *) iinfo->name;
+ #else
+    nd_set_link(nd, iinfo->name);
+ #endif

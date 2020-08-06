@@ -1,0 +1,20 @@
+--- vmmon-only/linux/hostif.c.orig	2016-10-15 13:27:47.484106186 +0300
++++ vmmon-only/linux/hostif.c	2016-10-15 13:31:30.648115529 +0300
+@@ -1162,7 +1162,7 @@
+    int retval;
+ 
+    down_read(&current->mm->mmap_sem);
+-   retval = get_user_pages(current, current->mm, (unsigned long)uvAddr,
++   retval = get_user_pages_remote(current, current->mm, (unsigned long)uvAddr,
+                            numPages, 0, 0, ppages, NULL);
+    up_read(&current->mm->mmap_sem);
+ 
+@@ -1589,7 +1589,7 @@
+                               global_page_state(NR_SLAB_UNRECLAIMABLE) +
+                               global_page_state(NR_UNEVICTABLE) +
+                               hugePages + reservedPages;
+-   unsigned int anonPages = global_page_state(NR_ANON_PAGES); 
++   unsigned int anonPages = global_page_state(NR_ANON_MAPPED); 
+    unsigned int swapPages = BYTES_2_PAGES(linuxState.swapSize);
+ 
+    if (anonPages > swapPages) {

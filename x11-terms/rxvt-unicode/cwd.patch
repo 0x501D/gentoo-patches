@@ -1,0 +1,39 @@
+--- a/src/perl/tabbed.orig	2015-09-09 14:17:08.958124720 +0300
++++ b/src/perl/tabbed	2015-09-09 14:24:41.086102009 +0300
+@@ -99,6 +99,14 @@
+ 
+    push @urxvt::TERM_EXT, urxvt::ext::tabbed::tab::;
+ 
++   if ( @{$self->{tabs}} ) {
++      my $pid = $self->{cur}{pid};
++      my $pwd = readlink "/proc/$pid/cwd";
++      if( $pwd ) {
++         push @argv, "-cd", $pwd;
++      }
++   }
++
+    my $term = new urxvt::term
+       $self->env, $urxvt::RXVTNAME,
+       -embed => $self->parent,
+@@ -312,6 +320,12 @@
+    1
+ }
+ 
++sub tab_child_start {
++  my ($self, $term, $pid) = @_;
++  $term->{pid} = $pid;
++  1;
++}
++
+ sub tab_start {
+    my ($self, $tab) = @_;
+ 
+@@ -402,7 +416,7 @@
+ # simply proxies all interesting calls back to the tabbed class.
+ 
+ {
+-   for my $hook (qw(start destroy key_press property_notify)) {
++   for my $hook (qw(start destroy key_press property_notify child_start)) {
+       eval qq{
+          sub on_$hook {
+             my \$parent = \$_[0]{term}{parent}

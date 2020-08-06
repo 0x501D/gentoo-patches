@@ -1,0 +1,11 @@
+--- vmmon-only/linux/hostif.c.orig	2016-12-12 15:35:02.531140304 +0300
++++ vmmon-only/linux/hostif.c	2016-12-12 15:41:48.251119924 +0300
+@@ -1164,7 +1164,7 @@
+ 
+    down_read(&current->mm->mmap_sem);
+    retval = get_user_pages_remote(current, current->mm, (unsigned long)uvAddr,
+-                           numPages, 0, 0, ppages, NULL);
++                           numPages, 0, ppages, NULL);
+    up_read(&current->mm->mmap_sem);
+ 
+    return retval != numPages;

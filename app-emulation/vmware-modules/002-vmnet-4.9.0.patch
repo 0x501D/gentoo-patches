@@ -1,0 +1,11 @@
+--- vmnet-only/userif.c.orig	2016-12-12 15:52:54.107086478 +0300
++++ vmnet-only/userif.c	2016-12-12 15:53:36.939084326 +0300
+@@ -114,7 +114,7 @@
+ 
+    down_read(&current->mm->mmap_sem);
+    retval = get_user_pages_remote(current, current->mm, addr,
+-			   1, 1, 0, &page, NULL);
++			   1, FOLL_WRITE, &page, NULL);
+    up_read(&current->mm->mmap_sem);
+ 
+    if (retval != 1) {

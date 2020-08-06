@@ -1,0 +1,19 @@
+--- rxvt-unicode-9.22.sixel-orig/src/screen.C	2018-02-28 16:48:20.641958044 +0300
++++ rxvt-unicode-9.22/src/screen.C	2018-02-28 17:13:01.462028655 +0300
+@@ -97,12 +97,11 @@
+ static size_t
+ tempfile_size(tempfile_t *tempfile)
+ {
+-  fpos_t fsize = 0;
++  struct stat info;
++  
++  fstat(fileno(tempfile->fp), &info);
+ 
+-  fseek((FILE *)tempfile->fp, 0L, SEEK_END);
+-  fgetpos((FILE *)tempfile->fp, &fsize);
+-
+-  return (size_t)fsize;
++  return info.st_size;
+ }
+ 
+ static tempfile_t *

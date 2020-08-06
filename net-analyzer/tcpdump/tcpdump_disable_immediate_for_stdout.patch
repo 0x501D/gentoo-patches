@@ -1,0 +1,78 @@
+From 58decff7ec0f5ce589cf19cd968c61b88cc44fbb Mon Sep 17 00:00:00 2001
+From: 0x501D <mail@void.so>
+Date: Thu, 6 Aug 2020 15:25:30 +0300
+Subject: [PATCH] Add --disable-immediate-mode option
+
+By default tcpdump enable immediate mode if output is stdout.
+libpcap uses TPACKET_V2 instead of TPACKET_V3 in this case and use pcap_read_linux_mmap_v2.
+If using X flag with tcpdump in this case not alll packets are printing to stdout.
+This option force using TPACKET_V3 with output to stdout.
+
+Signed-off-by: 0x501D <mail@void.so>
+---
+ tcpdump.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/tcpdump.c b/tcpdump.c
+index 043bda1..be83766 100644
+--- a/tcpdump.c
++++ b/tcpdump.c
+@@ -164,6 +164,7 @@ static int Wflag;			/* recycle output files after this number of files */
+ static int WflagChars;
+ static char *zflag = NULL;		/* compress each savefile using a specified command (like gzip or bzip2) */
+ static int immediate_mode;
++static int disable_immediate_mode = 0;
+ 
+ static int infodelay;
+ static int infoprint;
+@@ -539,6 +540,7 @@ show_devices_and_exit (void)
+ #define OPTION_VERSION		128
+ #define OPTION_TSTAMP_PRECISION	129
+ #define OPTION_IMMEDIATE_MODE	130
++#define OPTION_DISABLE_IMMEDIATE_MODE 131
+ 
+ static const struct option longopts[] = {
+ #if defined(HAVE_PCAP_CREATE) || defined(_WIN32)
+@@ -572,6 +574,7 @@ static const struct option longopts[] = {
+ 	{ "linktype", required_argument, NULL, 'y' },
+ #ifdef HAVE_PCAP_SET_IMMEDIATE_MODE
+ 	{ "immediate-mode", no_argument, NULL, OPTION_IMMEDIATE_MODE },
++	{ "disable-immediate-mode", no_argument, NULL, OPTION_DISABLE_IMMEDIATE_MODE },
+ #endif
+ #ifdef HAVE_PCAP_SET_PARSER_DEBUG
+ 	{ "debug-filter-parser", no_argument, NULL, 'Y' },
+@@ -1509,6 +1512,11 @@ main(int argc, char **argv)
+ 		case OPTION_IMMEDIATE_MODE:
+ 			immediate_mode = 1;
+ 			break;
++
++		case OPTION_DISABLE_IMMEDIATE_MODE:
++			disable_immediate_mode = 1;
++			break;
++
+ #endif
+ 
+ 		default:
+@@ -1553,8 +1561,9 @@ main(int argc, char **argv)
+ 	 * output is a terminal, use immediate mode, as the user's
+ 	 * probably expecting to see packets pop up immediately.
+ 	 */
+-	if (WFileName == NULL && isatty(1))
+-		immediate_mode = 1;
++	if (!disable_immediate_mode)
++		if (WFileName == NULL && isatty(1))
++			immediate_mode = 1;
+ #endif
+ 
+ #ifdef WITH_CHROOT
+@@ -2634,6 +2643,7 @@ print_usage(void)
+ #endif
+ #ifdef HAVE_PCAP_SET_IMMEDIATE_MODE
+ 	(void)fprintf(stderr, "[ --immediate-mode ] ");
++	(void)fprintf(stderr, "[ --disable-immediate-mode ] ");
+ #endif
+ 	(void)fprintf(stderr, "[ -T type ] [ --version ] [ -V file ]\n");
+ 	(void)fprintf(stderr,
+-- 
+2.26.2
+

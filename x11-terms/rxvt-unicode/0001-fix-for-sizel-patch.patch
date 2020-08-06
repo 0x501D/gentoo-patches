@@ -1,0 +1,11 @@
+diff -NEBbaur rxvt-unicode-9.22.orig/src/rxvt.h rxvt-unicode-9.22/src/rxvt.h
+--- rxvt-unicode-9.22.orig/src/rxvt.h	2018-02-28 16:40:16.294934949 +0300
++++ rxvt-unicode-9.22/src/rxvt.h	2018-02-28 16:44:28.507946975 +0300
+@@ -645,6 +645,7 @@
+ #define PrivMode_ExtModeMouse   (1UL<<23) // xterm pseudo-utf-8 hack
+ #define PrivMode_ExtMouseRight  (1UL<<24) // xterm pseudo-utf-8, but works in non-utf-8-locales
+ #define PrivMode_BlinkingCursor (1UL<<25)
++#define PrivMode_FocusEvent     (1UL<<26)
+ 
+ #define PrivMode_mouse_report   (PrivMode_MouseX10|PrivMode_MouseX11|PrivMode_MouseBtnEvent|PrivMode_MouseAnyEvent)
+ 

@@ -1,0 +1,24 @@
+diff -Naur vmnet-only.orig/netif.c vmnet-only/netif.c
+--- vmnet-only.orig/netif.c	2016-10-15 13:34:35.635123273 +0300
++++ vmnet-only/netif.c	2016-10-15 13:37:35.939130821 +0300
+@@ -465,7 +465,7 @@
+    VNetSend(&netIf->port.jack, skb);
+ 
+    netIf->stats.tx_packets++;
+-   dev->trans_start = jiffies;
++   netif_trans_update(dev);
+ 
+    return 0;
+ }
+diff -Naur vmnet-only.orig/userif.c vmnet-only/userif.c
+--- vmnet-only.orig/userif.c	2016-10-15 13:34:35.636123273 +0300
++++ vmnet-only/userif.c	2016-10-15 13:35:23.475125276 +0300
+@@ -113,7 +113,7 @@
+    int retval;
+ 
+    down_read(&current->mm->mmap_sem);
+-   retval = get_user_pages(current, current->mm, addr,
++   retval = get_user_pages_remote(current, current->mm, addr,
+ 			   1, 1, 0, &page, NULL);
+    up_read(&current->mm->mmap_sem);
+ 

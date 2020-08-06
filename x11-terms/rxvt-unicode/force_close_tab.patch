@@ -1,0 +1,11 @@
+--- a/src/perl/tabbed.orig	2017-12-26 16:08:45.703836829 +0300
++++ b/src/perl/tabbed	2017-12-26 16:10:25.431831819 +0300
+@@ -360,6 +360,8 @@
+          $self->make_current ($self->{tabs}[$idx % @{ $self->{tabs}}]);
+ 
+          return 1;
++      } elsif ($keysym == 0xff52) {
++         $tab->destroy;
+       } elsif ($keysym == 0xff54) {
+          $self->new_tab;
+ 

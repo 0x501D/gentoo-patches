@@ -1,0 +1,31 @@
+--- a/src/perl/tabbed.orig	2015-09-22 10:54:56.756159271 +0300
++++ b/src/perl/tabbed	2015-09-22 10:57:22.571151946 +0300
+@@ -46,16 +46,13 @@
+ 
+    my @ofs;
+ 
+-   substr $text, 0, 7, "[NEW] |";
+-   @$rend[0 .. 5] = ($self->{rs_tab}) x 6;
+-   push @ofs, [0, 6, sub { $_[0]->new_tab }];
++   substr $text, 0, 1, "|";
+ 
+-   my $ofs = 7;
+-   my $idx = 0;
++   my $ofs = 1;
++   my $char_code = 0x03B1;
+ 
+    for my $tab (@{ $self->{tabs} }) {
+-      $idx++;
+-
++      my $idx = sprintf("%c", $char_code);
+       my $act = $tab->{activity} && $tab != $self->{cur}
+                 ? "*" : " ";
+ 
+@@ -69,6 +66,7 @@
+       push @ofs, [ $ofs, $ofs + $len, sub { $_[0]->make_current ($tab) } ];
+ 
+       $ofs += $len + 1;
++      $char_code++;
+    }
+ 
+    $self->{tabofs} = \@ofs;

@@ -1,0 +1,71 @@
+diff -Naur a/hw/usb/core.c b/hw/usb/core.c
+--- a/hw/usb/core.c	2014-12-08 16:39:08.682781480 +0300
++++ b/hw/usb/core.c	2014-12-08 16:40:46.516776567 +0300
+@@ -28,26 +28,6 @@
+ #include "qemu/iov.h"
+ #include "trace.h"
+ 
+-void usb_pick_speed(USBPort *port)
+-{
+-    static const int speeds[] = {
+-        USB_SPEED_SUPER,
+-        USB_SPEED_HIGH,
+-        USB_SPEED_FULL,
+-        USB_SPEED_LOW,
+-    };
+-    USBDevice *udev = port->dev;
+-    int i;
+-
+-    for (i = 0; i < ARRAY_SIZE(speeds); i++) {
+-        if ((udev->speedmask & (1 << speeds[i])) &&
+-            (port->speedmask & (1 << speeds[i]))) {
+-            udev->speed = speeds[i];
+-            return;
+-        }
+-    }
+-}
+-
+ void usb_attach(USBPort *port)
+ {
+     USBDevice *dev = port->dev;
+@@ -55,7 +35,6 @@
+     assert(dev != NULL);
+     assert(dev->attached);
+     assert(dev->state == USB_STATE_NOTATTACHED);
+-    usb_pick_speed(port);
+     port->ops->attach(port);
+     dev->state = USB_STATE_ATTACHED;
+     usb_device_handle_attach(dev);
+diff -Naur a/hw/usb/desc.c b/hw/usb/desc.c
+--- a/hw/usb/desc.c	2014-12-08 16:39:26.522780583 +0300
++++ b/hw/usb/desc.c	2014-12-08 16:42:31.385771299 +0300
+@@ -518,6 +518,18 @@
+ 
+ void usb_desc_attach(USBDevice *dev)
+ {
++    const USBDesc *desc = usb_device_get_usb_desc(dev);
++
++    assert(desc != NULL);
++    if (desc->super && (dev->port->speedmask & USB_SPEED_MASK_SUPER)) {
++      dev->speed = USB_SPEED_SUPER;
++    } else if (desc->high && (dev->port->speedmask & USB_SPEED_MASK_HIGH)) {
++      dev->speed = USB_SPEED_HIGH;
++    } else if (desc->full && (dev->port->speedmask & USB_SPEED_MASK_FULL)) {
++      dev->speed = USB_SPEED_FULL;
++    } else {
++      return;
++    }
+     usb_desc_setdefaults(dev);
+ }
+ 
+diff -Naur a/include/hw/usb.h b/include/hw/usb.h
+--- a/include/hw/usb.h	2014-12-08 16:39:47.322779539 +0300
++++ b/include/hw/usb.h	2014-12-08 16:43:16.698769021 +0300
+@@ -458,7 +458,6 @@
+ void usb_combined_input_packet_complete(USBDevice *dev, USBPacket *p);
+ void usb_combined_packet_cancel(USBDevice *dev, USBPacket *p);
+ 
+-void usb_pick_speed(USBPort *port);
+ void usb_attach(USBPort *port);
+ void usb_detach(USBPort *port);
+ void usb_port_reset(USBPort *port);
