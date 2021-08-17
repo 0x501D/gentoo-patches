@@ -49,7 +49,7 @@ index 141f15a9a..6a4de4635 100644
  		logo = &logo_linux_clut224;
  #endif
 +#ifdef CONFIG_LOGO_POEHAVSHIY_CLUT224
-+		/* Generic Linux logo */
++		/* Poehavshiy logo */
 +		logo = &logo_poehavshiy_clut224;
 +#endif
  #ifdef CONFIG_LOGO_DEC_CLUT224
