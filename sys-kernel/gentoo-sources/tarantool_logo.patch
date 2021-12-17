@@ -23,7 +23,7 @@ index 6d6f8c087..dea4ee8f2 100644
  
 +config LOGO_TARANTOOL_CLUT224
 +	bool "Tarantool 224-color logo"
-+	default y
++	default n
 +
  config LOGO_DEC_CLUT224
  	bool "224-color Digital Equipment Corporation Linux logo"
