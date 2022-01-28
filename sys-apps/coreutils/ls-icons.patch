@@ -1,4 +1,4 @@
-From 9712732e460e21efeea6bb7e47df2f0b2c15368e Mon Sep 17 00:00:00 2001
+From 52072793460d36f35df80fe9b7acbbb831988dd5 Mon Sep 17 00:00:00 2001
 From: Pavel Balaev <balaev@tarantool.org>
 Date: Tue, 18 Jan 2022 15:33:29 +0300
 Subject: [PATCH] ls: add icons
@@ -12,8 +12,8 @@ optimised for kitty termimal and pragmatapro font.
  src/icons.gperf |  73 +++++++++++++++
  src/icons.h     |  11 +++
  src/local.mk    |   7 +-
- src/ls.c        |  90 +++++++++++++++++-
- 5 files changed, 415 insertions(+), 4 deletions(-)
+ src/ls.c        |  93 ++++++++++++++++++-
+ 5 files changed, 417 insertions(+), 5 deletions(-)
  create mode 100644 src/icons.c
  create mode 100644 src/icons.gperf
  create mode 100644 src/icons.h
@@ -387,7 +387,7 @@ index e1d15ce16..69ca5851d 100644
    src/force-link.c src/force-link.h \
    src/relpath.c src/relpath.h
 diff --git a/src/ls.c b/src/ls.c
-index 6ba8c0cad..74f684230 100644
+index 6ba8c0cad..11501788f 100644
 --- a/src/ls.c
 +++ b/src/ls.c
 @@ -96,6 +96,7 @@
@@ -444,7 +444,24 @@ index 6ba8c0cad..74f684230 100644
          case HIDE_OPTION:
            {
              struct ignore_pattern *hide = xmalloc (sizeof *hide);
-@@ -3538,7 +3550,7 @@ gobble_file (char const *name, enum filetype type, ino_t inode,
+@@ -3357,6 +3369,7 @@ gobble_file (char const *name, enum filetype type, ino_t inode,
+   if (command_line_arg
+       || print_hyperlink
+       || format_needs_stat
++      || print_icons
+       /* When coloring a directory (we may know the type from
+          direct.d_type), we have to stat it in order to indicate
+          sticky and/or other-writable attributes.  */
+@@ -3523,7 +3536,7 @@ gobble_file (char const *name, enum filetype type, ino_t inode,
+         }
+ 
+       if (S_ISLNK (f->stat.st_mode)
+-          && (format == long_format || check_symlink_mode))
++          && (format == long_format || check_symlink_mode || print_icons))
+         {
+           struct stat linkstats;
+ 
+@@ -3538,7 +3551,7 @@ gobble_file (char const *name, enum filetype type, ino_t inode,
            /* Avoid following symbolic links when possible, ie, when
               they won't be traced and when no indicator is needed.  */
            if (linkname
@@ -453,7 +470,7 @@ index 6ba8c0cad..74f684230 100644
                && stat_for_mode (linkname, &linkstats) == 0)
              {
                f->linkok = true;
-@@ -4122,6 +4134,7 @@ print_current_files (void)
+@@ -4122,6 +4135,7 @@ print_current_files (void)
      case one_per_line:
        for (i = 0; i < cwd_n_used; i++)
          {
@@ -461,7 +478,7 @@ index 6ba8c0cad..74f684230 100644
            print_file_name_and_frills (sorted_file[i], 0);
            putchar (eolbyte);
          }
-@@ -4478,6 +4491,7 @@ print_long_format (const struct fileinfo *f)
+@@ -4478,6 +4492,7 @@ print_long_format (const struct fileinfo *f)
      }
  
    dired_outbuf (buf, p - buf);
@@ -469,7 +486,7 @@ index 6ba8c0cad..74f684230 100644
    size_t w = print_name_with_quoting (f, false, &dired_obstack, p - buf);
  
    if (f->filetype == symbolic_link)
-@@ -5107,6 +5121,9 @@ length_of_file_name_and_frills (const struct fileinfo *f)
+@@ -5107,6 +5122,9 @@ length_of_file_name_and_frills (const struct fileinfo *f)
        len += (c != 0);
      }
  
@@ -479,7 +496,7 @@ index 6ba8c0cad..74f684230 100644
    return len;
  }
  
-@@ -5133,6 +5150,7 @@ print_many_per_line (void)
+@@ -5133,6 +5151,7 @@ print_many_per_line (void)
            struct fileinfo const *f = sorted_file[filesno];
            size_t name_length = length_of_file_name_and_frills (f);
            size_t max_name_length = line_fmt->col_arr[col++];
@@ -487,7 +504,7 @@ index 6ba8c0cad..74f684230 100644
            print_file_name_and_frills (f, pos);
  
            filesno += rows;
-@@ -5146,6 +5164,76 @@ print_many_per_line (void)
+@@ -5146,6 +5165,76 @@ print_many_per_line (void)
      }
  }
  
